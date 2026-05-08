@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WoonST — Agressiemelding</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --grn:#498205;--grn-light:#EAF4EC;--grn-mid:#7DC419;--grn-dark:#294903;--grn-text:#386304;
+  --blue:#00A0B4;--blue-light:#E0F0F5;--blue-dark:#007A8A;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-dark:#633806;
+  --coral:#993C1D;--coral-light:#FAECE7;--coral-dark:#712B13;
+  --red:#A32D2D;--red-light:#FCEBEB;--red-dark:#791F1F;
+  --gray:#5F5E5A;--gray-light:#F1EFE8;--gray-dark:#444441;
+  --bg:#FAFAF8;--surface:#FFFFFF;--border:#E5E5E0;--border-mid:#D0CFC8;
+  --text:#272525;--text-2:#5A5A56;--text-3:#8A8A84;
+  --radius:8px;--radius-lg:12px;
+  --warn-bg:#FFF8DC;--warn-border:#E5CF2E;--warn-text:#5C4A00;
+}
+body{font-family:'Folks','Calibri','Segoe UI',system-ui,sans-serif;font-size:17px;color:var(--text);background:var(--bg);min-height:100vh}
+.page{max-width:680px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border)}
+.header-icon{width:40px;height:40px;border-radius:var(--radius);background:var(--grn-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-icon svg{width:22px;height:22px;stroke:var(--grn-dark);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.header-title{font-size:19px;font-weight:600;color:var(--text)}
+.header-sub{font-size:15px;color:var(--text-3);margin-top:1px}
+.prog{display:flex;gap:5px;margin-bottom:1.75rem}
+.pd{height:4px;flex:1;border-radius:2px;background:var(--border)}
+.pd.done{background:var(--grn)}.pd.cur{background:var(--grn-mid)}
+.step{display:none}.step.active{display:block}
+.stitle{font-size:18px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ssub{font-size:15px;color:var(--text-2);margin-bottom:1.25rem;line-height:1.55}
+.field{margin-bottom:1.1rem}
+.lbl{display:block;font-size:13px;font-weight:600;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.req{color:#C0392B}
+input[type=text],input[type=email],input[type=date],input[type=time],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);
+  font-size:16px;color:var(--text);background:var(--surface);font-family:inherit;
+  transition:border-color .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:14px;color:var(--text-3);margin-top:4px;line-height:1.4}
+.err{font-size:14px;color:#C0392B;margin-top:4px;display:none}
+.err.show{display:block}
+.condfield{display:none}.condfield.show{display:block}
+.divider{height:1px;background:var(--border);margin:1.1rem 0}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.cat-btn{padding:11px 12px;border-radius:var(--radius);border:1px solid var(--border-mid);background:var(--surface);cursor:pointer;text-align:left;transition:all .15s;width:100%}
+.cat-btn:hover{border-color:var(--grn-mid);background:var(--grn-light)}
+.cat-btn .cn{font-size:16px;font-weight:600;display:block;margin-bottom:2px;color:var(--text)}
+.cat-btn .cd{font-size:14px;color:var(--text-3);line-height:1.35}
+.cat-btn.sel1{border:2px solid var(--gray);background:var(--gray-light)}.cat-btn.sel1 .cn{color:var(--gray-dark)}
+.cat-btn.sel2{border:2px solid var(--amber);background:var(--amber-light)}.cat-btn.sel2 .cn{color:var(--amber-dark)}
+.cat-btn.sel3{border:2px solid var(--coral);background:var(--coral-light)}.cat-btn.sel3 .cn{color:var(--coral-dark)}
+.cat-btn.sel4{border:2px solid var(--red);background:var(--red-light)}.cat-btn.sel4 .cn{color:var(--red-dark)}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.chk-item{display:flex;align-items:center;gap:8px;font-size:16px;padding:7px 9px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;color:var(--text);transition:border-color .12s,background .12s}
+.chk-item:hover{border-color:var(--grn-mid);background:var(--grn-light)}
+.chk-item input[type=checkbox]{width:15px;height:15px;flex-shrink:0;accent-color:var(--grn);cursor:pointer}
+.nav{display:flex;gap:10px;margin-top:1.5rem;align-items:center}
+.nav-r{margin-left:auto;display:flex;gap:8px}
+.btn{padding:10px 22px;border-radius:var(--radius);cursor:pointer;font-size:16px;font-weight:600;border:1px solid;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{filter:brightness(.95)}
+.btn:active{transform:scale(.98)}
+.btn-ghost{border-color:var(--border-mid);background:var(--surface);color:var(--text-2)}
+.btn-grn{border-color:#2ECC96;background:var(--grn-light);color:var(--grn-dark)}
+.btn-submit{border-color:var(--grn);background:var(--grn);color:#fff;font-size:15px;padding:12px 32px;width:100%;justify-content:center;margin-top:.5rem}
+.btn-submit:hover{background:var(--grn-dark);border-color:var(--grn-dark);filter:none}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.card-title svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;margin-bottom:1rem}
+.bg1{background:var(--gray-light);color:var(--gray-dark)}
+.bg2{background:var(--amber-light);color:var(--amber-dark)}
+.bg3{background:var(--coral-light);color:var(--coral-dark)}
+.bg4{background:var(--red-light);color:var(--red-dark)}
+.tip-block{border-left:3px solid var(--grn-mid);padding:9px 13px;margin-bottom:8px;font-size:16px;color:var(--text);line-height:1.55;border-radius:0 var(--radius) var(--radius) 0;background:#FAFDF9}
+.tip-block:last-of-type{margin-bottom:0}
+.support-bar{background:var(--grn-light);border-radius:var(--radius);padding:11px 14px;font-size:15px;color:var(--grn-dark);line-height:1.6;margin-top:10px}
+.support-bar strong{font-weight:600;display:block;margin-bottom:3px}
+.support-contacts{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px}
+.support-contacts span{display:flex;align-items:center;gap:5px;font-size:15px}
+.nr-box{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--grn-light);border:1px solid var(--grn-mid);margin-bottom:1.25rem}
+.nr-val{font-size:24px;font-weight:700;color:var(--grn-dark);letter-spacing:.05em}
+.nr-lbl{font-size:11px;color:var(--grn-text);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.submit-area{border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;background:var(--surface);margin-top:1.5rem}
+.submit-title{font-size:17px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.submit-sub{font-size:15px;color:var(--text-2);margin-bottom:.75rem;line-height:1.5}
+.reset-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border);background:transparent;color:var(--text-3);cursor:pointer;font-size:13px;font-family:inherit;margin-top:.75rem;transition:all .15s}
+.reset-link:hover{background:var(--gray-light);color:var(--text)}
+/* Popup overlay */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.popup-overlay.show{display:flex}
+.popup-box{background:var(--surface);border-radius:var(--radius-lg);padding:2rem 1.75rem;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.popup-icon{width:52px;height:52px;border-radius:50%;background:var(--grn);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.popup-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.popup-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px}
+.popup-sub{font-size:13px;color:var(--text-2);line-height:1.55;margin-bottom:1.25rem}
+.popup-nr{font-size:18px;font-weight:700;color:var(--grn-dark);letter-spacing:.05em;margin-bottom:1.25rem;padding:8px 16px;background:var(--grn-light);border-radius:var(--radius);display:inline-block}
+.popup-btn{padding:10px 28px;border-radius:var(--radius);border:none;background:var(--grn);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.popup-btn:hover{background:var(--grn-dark)}
+@media(max-width:520px){.row2,.cat-grid,.chk-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="popup-overlay" id="popup">
+  <div class="popup-box">
+    <div class="popup-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <div class="popup-title">Melding verstuurd</div>
+    <div class="popup-sub">HR, jouw leidinggevende en jijzelf ontvangen zo dadelijk een bevestigingsmail. Bewaar je meldingsnummer:</div>
+    <div class="popup-nr" id="popup-nr"></div>
+    <div class="popup-sub">Je kan dit scherm nu veilig sluiten.</div>
+    <button class="popup-btn" onclick="closePopup()">Sluiten</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div>
+      <div class="header-title">WoonST &mdash; Agressiemelding</div>
+      <div class="header-sub">Meldingsformulier voor medewerkers</div>
+    </div>
+  </div>
+
+  <div class="prog" id="prog">
+    <div class="pd cur" id="pd0"></div>
+    <div class="pd" id="pd1"></div>
+    <div class="pd" id="pd2"></div>
+    <div class="pd" id="pd3"></div>
+    <div class="pd" id="pd4"></div>
+  </div>
+
+  <!-- STAP 0 -->
+  <div class="step active" id="s0">
+    <div class="stitle">Jouw gegevens</div>
+    <div class="ssub">Je melding wordt bewaard door de interne preventieadviseur en HR en kan alleen worden geraadpleegd door de werkgever, HR, de vertrouwenspersoon, de interne preventieadviseur, de externe preventieadviseur psychosociale aspecten en de met toezicht belaste ambtenaar.</div>
+
+    <div class="field">
+      <label class="lbl" for="naam">Jouw naam <span class="req">*</span></label>
+      <input type="text" id="naam" placeholder="Voornaam Naam">
+      <div class="err" id="err-naam">Vul je naam in.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="team">Team / dienst <span class="req">*</span></label>
+      <select id="team">
+        <option value="">— Kies je team —</option>
+        <option>Patrimoniumbeheer</option>
+        <option>Projecten</option>
+        <option>Projecten &amp; Patrimoniumbeheer</option>
+        <option>Klantenadministratie huur</option>
+        <option>Huurbegeleiding</option>
+        <option>HR &amp; Communicatie</option>
+        <option>ICT &amp; GDPR</option>
+        <option>Financiën, debiteurenbeheer &amp; koop en lenen</option>
+        <option>Directie / Beleidsondersteuning</option>
+      </select>
+      <div class="err" id="err-team">Kies je team.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label class="lbl" for="melder-mail">Jouw e-mailadres <span class="req">*</span></label>
+      <input type="email" id="melder-mail" placeholder="voornaam.naam@woonst.be">
+      <div class="hint">Je ontvangt automatisch een bevestiging met jouw meldingsnummer en alle ingediende gegevens.</div>
+      <div class="err" id="err-melder-mail">Vul jouw e-mailadres in.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="leid-mail">E-mailadres leidinggevende <span class="req">*</span></label>
+      <input type="email" id="leid-mail" placeholder="voornaam.naam@woonst.be">
+      <div class="hint">De leidinggevende ontvangt automatisch de actielijst na jouw melding.</div>
+      <div class="err" id="err-leid">Vul een geldig e-mailadres in van de leidinggevende.</div>
+    </div>
+
+    <div class="nav"><div class="nav-r">
+      <button class="btn btn-grn" onclick="goStep(1)">Volgende
+        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div></div>
+  </div>
+
+  <!-- STAP 1 -->
+  <div class="step" id="s1">
+    <div class="stitle">Het incident</div>
+    <div class="ssub">Wanneer, waar en met wie vond het incident plaats?</div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lbl" for="inc-datum">Datum <span class="req">*</span></label>
+        <input type="date" id="inc-datum">
+        <div class="err" id="err-datum">Selecteer de datum van het incident.</div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="inc-tijd">Tijdstip (bij benadering)</label>
+        <input type="time" id="inc-tijd">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="locatie">Locatie <span class="req">*</span></label>
+      <select id="locatie">
+        <option value="">— Kies locatie —</option>
+        <option>Kantoor Sint-Niklaas (William Griffithsstraat)</option>
+        <option>Kantoor Sint-Niklaas (Onze-Lieve-Vrouwplein)</option>
+        <option>Kantoor Temse</option>
+        <option>Telefonisch</option>
+        <option>Digitaal (e-mail / sociale media)</option>
+        <option>Huisbezoek</option>
+        <option>Werf / technische interventie</option>
+        <option>Andere</option>
+      </select>
+      <div class="err" id="err-locatie">Kies de locatie.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="agressor">Naam en/of adres derde (pleger) <span class="req">*</span></label>
+      <input type="text" id="agressor" placeholder="Voornaam Naam en/of adres (bv. Kerkstraat 12, Sint-Niklaas)">
+      <div class="hint">Vul naam in indien gekend, adres indien naam onbekend, of beide. Noodzakelijk voor de registratie en opvolging in GashNet.Plus.</div>
+      <div class="err" id="err-agressor">Vul de naam en/of het adres van de pleger in.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="getuige">Naam getuige (indien van toepassing)</label>
+      <input type="text" id="getuige" placeholder="Voornaam Naam — laat leeg indien geen getuige">
+      <div class="hint">Optioneel. Enkel invullen als er een getuige aanwezig was die het incident heeft gezien of gehoord.</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lbl" for="hoedanigheid">Hoedanigheid agressor</label>
+        <select id="hoedanigheid">
+          <option value="">— Kies —</option>
+          <option>Huurder</option>
+          <option>Familielid van huurder</option>
+          <option>Bezoeker / derde</option>
+          <option>Leverancier / aannemer</option>
+          <option>Andere</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="recidive">Eerder incident met deze persoon?</label>
+        <select id="recidive">
+          <option value="">— Kies —</option>
+          <option value="Nee, eerste melding">Nee, eerste melding</option>
+          <option value="Ja, eerder incident gekend">Ja, eerder incident</option>
+          <option value="Niet zeker / onbekend">Niet zeker</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goStep(0)">
+        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Terug
+      </button>
+      <div class="nav-r">
+        <button class="btn btn-grn" onclick="goStep(2)">Volgende
+          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAP 2 -->
+  <div class="step" id="s2">
+    <div class="stitle">Wat is er gebeurd?</div>
+    <div class="ssub">Kies de categorie die het best past. Dit bepaalt welke acties worden aanbevolen aan jouw leidinggevende.</div>
+
+    <div class="field">
+      <label class="lbl">Categorie agressie <span class="req">*</span></label>
+      <div class="cat-grid">
+        <button class="cat-btn" id="c1" onclick="selCat(1)" type="button">
+          <span class="cn">CAT 1 &mdash; Lichte agressie</span>
+          <span class="cd">Stemverheffing, onbeleefdheid, opdringerigheid</span>
+        </button>
+        <button class="cat-btn" id="c2" onclick="selCat(2)" type="button">
+          <span class="cn">CAT 2 &mdash; Verbale agressie</span>
+          <span class="cd">Schelden, beledigen, discriminatie, weigeren te vertrekken</span>
+        </button>
+        <button class="cat-btn" id="c3" onclick="selCat(3)" type="button">
+          <span class="cn">CAT 3 &mdash; Bedreiging</span>
+          <span class="cd">Bedreiging persoon/familie, stalking, insluiten, recidive CAT 2</span>
+        </button>
+        <button class="cat-btn" id="c4" onclick="selCat(4)" type="button">
+          <span class="cn">CAT 4 &mdash; Fysiek geweld</span>
+          <span class="cd">Slaan, spugen, wapens, vernieling, doodsbedreiging</span>
+        </button>
+      </div>
+      <div class="err" id="err-cat">Kies een categorie.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Uitingsvorm (meerdere mogelijk)</label>
+      <div class="chk-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <label class="chk-item"><input type="checkbox" class="uitvorm" value="Verbaal"> Verbaal</label>
+        <label class="chk-item"><input type="checkbox" class="uitvorm" value="Fysiek"> Fysiek</label>
+        <label class="chk-item"><input type="checkbox" class="uitvorm" value="Digitaal"> Digitaal</label>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lbl" for="taalbarr">Taalbarrière aanwezig?</label>
+        <select id="taalbarr">
+          <option value="Niet zeker">Niet zeker</option>
+          <option value="Nee">Nee</option>
+          <option value="Ja">Ja</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="invloed">Onder invloed (alcohol / drugs)?</label>
+        <select id="invloed">
+          <option value="Niet zeker">Niet zeker</option>
+          <option value="Nee">Nee</option>
+          <option value="Ja, vermoedelijk">Ja, vermoedelijk</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goStep(1)">
+        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Terug
+      </button>
+      <div class="nav-r">
+        <button class="btn btn-grn" onclick="goStep(3)">Volgende
+          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAP 3 -->
+  <div class="step" id="s3">
+    <div class="stitle">Gevolgen en beschrijving</div>
+    <div class="ssub">Nodig voor de registratie en de risicoanalyse door de preventieadviseur.</div>
+
+    <div class="field">
+      <label class="lbl">Lichamelijke schade</label>
+      <div class="chk-grid">
+        <label class="chk-item"><input type="checkbox" class="lschade" value="Geen"> Geen</label>
+        <label class="chk-item"><input type="checkbox" class="lschade" value="Melder zelf"> Melder zelf</label>
+        <label class="chk-item"><input type="checkbox" class="lschade" value="Collega"> Collega</label>
+        <label class="chk-item"><input type="checkbox" class="lschade" value="Derde persoon"> Derde</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Materiële schade</label>
+      <div class="chk-grid">
+        <label class="chk-item"><input type="checkbox" class="mschade" value="Geen"> Geen</label>
+        <label class="chk-item"><input type="checkbox" class="mschade" value="Persoonlijke bezittingen"> Persoonlijk</label>
+        <label class="chk-item"><input type="checkbox" class="mschade" value="Gebouw / meubilair"> Gebouw / meubilair</label>
+        <label class="chk-item"><input type="checkbox" class="mschade" value="Voertuig"> Voertuig</label>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="lbl" for="arb-ongeval">Aangifte arbeidsongeval</label>
+        <select id="arb-ongeval"><option value="Nee">Nee</option><option value="Ja">Ja</option></select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="politie">Aangifte politie</label>
+        <select id="politie" onchange="togglePV()"><option value="Nee">Nee</option><option value="Ja">Ja</option></select>
+      </div>
+    </div>
+
+    <div class="condfield" id="field-pv">
+      <div class="field">
+        <label class="lbl" for="pv-nr">PV-nummer</label>
+        <input type="text" id="pv-nr" placeholder="bv. PV/2026/...">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="beschrijving">Beschrijving van de feiten <span class="req">*</span></label>
+      <textarea id="beschrijving" placeholder="Omschrijf kort wat er is gebeurd."></textarea>
+      <div class="err" id="err-beschr">Geef een korte beschrijving van de feiten.</div>
+    </div>
+
+    <div class="submit-area">
+      <div class="submit-title">Melding versturen</div>
+      <div class="submit-sub">Na het klikken op de knop wordt een volledig voorgevulde e-mail geopend in Outlook naar HR, jouw leidinggevende (cc) en jijzelf (bcc).</div>
+      <div style="display:flex;align-items:flex-start;gap:10px;background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:.85rem">
+        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:1px;stroke:#8a6800;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div style="font-size:13px;font-weight:600;color:var(--warn-text);line-height:1.5">Klik daarna op <strong>Verzenden</strong> in Outlook om de melding effectief te versturen. Zolang je niet op Verzenden klikt in Outlook, is de melding nog niet ingediend.</div>
+      </div>
+      <button class="btn btn-submit" onclick="buildAndSend()" type="button">
+        <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Melding versturen
+      </button>
+    </div>
+
+    <div class="nav" style="margin-top:.75rem">
+      <button class="btn btn-ghost" onclick="goStep(2)">
+        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Terug
+      </button>
+    </div>
+  </div>
+
+  <!-- STAP 4: resultaat melder — tips zichtbaar, register verborgen -->
+  <div class="step" id="s4">
+    <div id="result-content"></div>
+  </div>
+
+</div>
+
+<script>
+var cat=0,curStep=0,_nr='';
+
+var ACTIES={
+  1:{
+    leid_acties:[
+      '1. Spreek de medewerker persoonlijk aan — ook al lijkt het incident klein: "Hoe voel je je? Wil je er even over praten?"',
+      '2. Geen formele brief of ordegesprek vereist voor CAT 1. Noteer het intern en houd in het oog of dit patroon zich herhaalt bij dezelfde persoon.',
+      '3. Recidive van CAT 1 door dezelfde persoon = automatisch CAT 2. Start dan de formele procedure (aangetekende waarschuwingsbrief).'
+    ],
+    leid_tips:[
+      'Valideer de ervaring van de medewerker expliciet: ook een "licht" incident kan impact hebben. Zeg dit hardop.',
+      'HR (hr@woonst.be) staat klaar als sparringpartner als je twijfelt over de ernst of de aanpak.',
+      'De vertrouwenspersoon van WoonST kan de medewerker ondersteunen als die dit wenst — verwijs actief door.'
+    ],
+    melder_tips:[
+      'Het is normaal als je je even ongemakkelijk voelt, ook bij een "licht" incident. Geef jezelf de ruimte om te herstellen.',
+      'Pas het S.B.A.-model toe bij een volgend contact: Signaleer het type agressie, Begren met een duidelijke boodschap, Breek af als de grens overschreden blijft.',
+      'Je kan altijd terecht bij HR (hr@woonst.be) of de vertrouwenspersoon van WoonST. Jouw veiligheid telt.',
+      'Vertel het ook mondeling aan je leidinggevende — zo wordt een patroon zichtbaar en kan WoonST preventief handelen.'
+    ]
+  },
+  2:{
+    leid_acties:[
+      '1. Binnen 24u: verstuur een aangetekende waarschuwingsbrief (sjabloon in bijlage agressieprotocol). Vermeld de norm en de gevolgen bij herhaling.',
+      '2. GashNet.Plus: duid de huurder/derde onmiddellijk aan als "Attentie Agressie" zodat collega\'s gewaarschuwd zijn.',
+      '3. Binnen 3 werkdagen: plan een opvolggesprek met de medewerker. Focus op welzijn — niet op beoordeling van het handelen. De medewerker kan vragen dat HR of de vertrouwenspersoon erbij aanwezig is.',
+      '4. Informeer HR (hr@woonst.be) zodat de preventieadviseur op de hoogte is.'
+    ],
+    leid_tips:[
+      'Erken het incident expliciet: "Dit had niet mogen gebeuren en het is terecht dat je dit meldt."',
+      'Twijfel je over de ernst of de procedure? Contacteer HR (hr@woonst.be) — zij ondersteunen je in elke stap.',
+      'De vertrouwenspersoon is beschikbaar voor de medewerker als die nood heeft aan een neutraal aanspreekpunt buiten de hiërarchische lijn.',
+      'Houd de briefopvolging bij: bij herhaling door dezelfde persoon schakel je onmiddellijk op naar CAT 3.'
+    ],
+    melder_tips:[
+      'Jouw melding is correct en moedig. Een waarschuwingsbrief gaat naar de huurder — dit is een formele maatregel die WoonST neemt, niet jij.',
+      'Je leidinggevende plant een gesprek met jou binnen 3 werkdagen. Je mag vragen dat HR of de vertrouwenspersoon erbij aanwezig is. Dit is jouw recht.',
+      'HR (hr@woonst.be) en de vertrouwenspersoon staan voor jou klaar — ook als je gewoon je verhaal wil doen.',
+      'Bij aanhoudende spanning of slaapproblemen: bel Mensura (02 549 71 00, 24/7). Gratis en vertrouwelijk.'
+    ]
+  },
+  3:{
+    leid_acties:[
+      '1. Onmiddellijk: stuur aangetekende brief met voornemen tot kantoorverbod (3–6 maanden) + oproeping ordegesprek. Vermeld de hoorplicht (7 kalenderdagen verweer).',
+      '2. GashNet.Plus: duid onmiddellijk aan als "Attentie Agressie". Informeer alle baliemedewerkers persoonlijk — vandaag nog.',
+      '3. Ordegesprek: altijd met 2 medewerkers in een veilige ruimte. Tolk verplicht bij taalbarrière. Enkel gedrag en impact bespreken.',
+      '4. Dienstverlening beperken tot essentiële herstellingen zolang de veiligheid niet gegarandeerd is.',
+      '5. Overleg eerst met HR (hr@woonst.be) over de brief en het ordegesprek vóór je handelt.',
+      '6. Opvolggesprek medewerker binnen 48u. Betrek HR actief. Overweeg doorverwijzing Mensura (02 549 71 00).'
+    ],
+    leid_tips:[
+      'Dit is een ernstig incident. Jij hoeft dit niet alleen te beheren — HR begeleidt je door de procedure stap voor stap.',
+      'De medewerker kan nood hebben aan meer dan een gesprekje. Wijs actief op de vertrouwenspersoon en Mensura.',
+      'Communiceer intern enkel via de hiërarchische lijn. Geen details delen met collega\'s die niet direct betrokken zijn.',
+      'Laat HR de schriftelijke bevestiging van de beslissing opmaken na het ordegesprek. Doe dit niet informeel.'
+    ],
+    melder_tips:[
+      'Dit is een ernstig incident en WoonST neemt formele maatregelen. Jij hoeft dit niet alleen te dragen.',
+      'Zorg nu eerst voor jezelf.',
+      'HR (hr@woonst.be) en de vertrouwenspersoon staan direct voor je klaar — voor een luisterend oor of praktische ondersteuning.',
+      'Spreek erover — bel gerust Mensura (02 549 71 00, 24/7). Herbelevingen en angst zijn normale reacties op een abnormale situatie.',
+      'Aangifte bij de politie is een optie die WoonST actief ondersteunt. HR begeleidt je hierin indien gewenst.'
+    ]
+  },
+  4:{
+    leid_acties:[
+      '1. Onmiddellijk: kantoorverbod (12+ maanden) per aangetekende brief. Ordegesprek niet vereist als de veiligheid dit niet toelaat.',
+      '2. Politie verwittigen (Sint-Niklaas: 03 760 65 00 | Temse: 03 711 02 02) indien niet al gedaan.',
+      '3. GashNet.Plus: onmiddellijk aanduiden. Alle baliemedewerkers persoonlijk informeren — face-to-face, niet via mail.',
+      '4. Dienstverlening stopzetten tot enkel essentiële herstellingen. Bij huisbezoek nadien: altijd twee medewerkers.',
+      '5. Directie informeren voor eventuele opstart procedure vrederechter (opzeg huurovereenkomst).',
+      '6. Medewerker onmiddellijk opvangen (PFA-principes). Mensura inschakelen (02 549 71 00). Bij zwaar letsel of hospitalisatie: Arbeidsinspectie melden binnen 24u.',
+      '7. HR onmiddellijk betrekken (hr@woonst.be) — zij coördineren de nazorg, de juridische stappen en de interne communicatie.'
+    ],
+    leid_tips:[
+      'CAT 4 overstijgt wat jij alleen kan dragen. Escaleer onmiddellijk naar HR en directie — dit is de juiste procedure.',
+      'De medewerker heeft mogelijk meer nodig dan één gesprek. Blijf actief opvolgen de komende weken.',
+      'De vertrouwenspersoon kan een veilige ruimte bieden buiten de hiërarchische lijn. Verwijs actief door.',
+      'Documenteer alles schriftelijk vanaf het eerste moment — voor het register, de politie en eventuele juridische procedure.'
+    ],
+    melder_tips:[
+      'Wat jou is overkomen is ernstig en absoluut onaanvaardbaar. Jij hebt geen fout gemaakt.',
+      'Zorg nu eerst voor jezelf.',
+      'HR (hr@woonst.be) en de vertrouwenspersoon bieden directe ondersteuning — je hoeft niets alleen te beslissen.',
+      'Mensura staat 24/7 voor je klaar: 02 549 71 00. Bel ook als je twijfelt of je "erg genoeg" geraakt bent.',
+      'WoonST ondersteunt jou volledig bij aangifte en eventueel burgerlijke partijstelling. HR begeleidt je stap voor stap.'
+    ]
+  }
+};
+
+function togglePV(){
+  document.getElementById('field-pv').classList.toggle('show',document.getElementById('politie').value==='Ja');
+}
+function selCat(n){
+  cat=n;
+  [1,2,3,4].forEach(function(i){
+    var b=document.getElementById('c'+i);b.className='cat-btn';
+    if(i===n)b.classList.add('sel'+n);
+  });
+}
+function showStep(n){
+  document.querySelectorAll('.step').forEach(function(s,i){s.classList.toggle('active',i===n);});
+  for(var i=0;i<5;i++){
+    var d=document.getElementById('pd'+i);
+    d.className='pd'+(i<n?' done':i===n?' cur':'');
+  }
+  curStep=n;window.scrollTo(0,0);
+}
+function clearErr(){document.querySelectorAll('.err').forEach(function(e){e.classList.remove('show');});}
+function showErr(id){document.getElementById(id).classList.add('show');}
+
+function goStep(n){
+  clearErr();
+  if(n>curStep){
+    if(curStep===0){
+      var ok=true;
+      if(!document.getElementById('naam').value.trim()){showErr('err-naam');ok=false;}
+      if(!document.getElementById('team').value){showErr('err-team');ok=false;}
+      var mm=document.getElementById('melder-mail').value.trim();
+      if(!mm||!mm.includes('@')){showErr('err-melder-mail');ok=false;}
+      var lm=document.getElementById('leid-mail').value.trim();
+      if(!lm||!lm.includes('@')){showErr('err-leid');ok=false;}
+      if(!ok)return;
+    }
+    if(curStep===1){
+      var ok=true;
+      if(!document.getElementById('inc-datum').value){showErr('err-datum');ok=false;}
+      if(!document.getElementById('locatie').value){showErr('err-locatie');ok=false;}
+      if(!document.getElementById('agressor').value.trim()){showErr('err-agressor');ok=false;}
+      if(!ok)return;
+    }
+    if(curStep===2){if(!cat){showErr('err-cat');return;}}
+  }
+  showStep(n);
+}
+
+function genNr(){
+  var d=new Date();
+  var uur=String(d.getHours()).padStart(2,'0');
+  var min=String(d.getMinutes()).padStart(2,'0');
+  var rnd=String(Math.floor(Math.random()*90)+10);
+  return'AGR-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+uur+min+rnd;
+}
+function getChecked(cls){
+  var v=Array.from(document.querySelectorAll('.'+cls+':checked')).map(function(c){return c.value;});
+  return v.length?v.join(', '):'—';
+}
+
+function buildAndSend(){
+  clearErr();
+  if(!document.getElementById('beschrijving').value.trim()){showErr('err-beschr');return;}
+
+  var nr=genNr();_nr=nr;
+  var naam=document.getElementById('naam').value.trim();
+  var team=document.getElementById('team').value||'—';
+  var melderMail=document.getElementById('melder-mail').value.trim();
+  var leidMail=document.getElementById('leid-mail').value.trim();
+  var datum=document.getElementById('inc-datum').value;
+  var tijd=document.getElementById('inc-tijd').value||'—';
+  var loc=document.getElementById('locatie').value||'—';
+  var agressor=document.getElementById('agressor').value.trim();
+  var getuige=document.getElementById('getuige').value.trim()||'—';
+  var hoed=document.getElementById('hoedanigheid').value||'—';
+  var recidive=document.getElementById('recidive').value||'—';
+  var uitvorm=getChecked('uitvorm');
+  var taalb=document.getElementById('taalbarr').value;
+  var invl=document.getElementById('invloed').value;
+  var lsch=getChecked('lschade');
+  var melderGewond=Array.from(document.querySelectorAll('.lschade:checked')).some(function(c){return c.value==='Melder zelf';});
+  var msch=getChecked('mschade');
+  var arbOng=document.getElementById('arb-ongeval').value;
+  var pol=document.getElementById('politie').value;
+  var pvnr=pol==='Ja'?(document.getElementById('pv-nr').value||'—'):'—';
+  var beschr=document.getElementById('beschrijving').value.trim();
+  var regDatum=new Date().toLocaleDateString('nl-BE');
+
+  var catLabels={1:'CAT 1 — Lichte agressie',2:'CAT 2 — Verbale agressie / intimidatie',3:'CAT 3 — Bedreiging / ernstige overlast',4:'CAT 4 — Fysiek geweld / extreem'};
+  var badgeCls={1:'bg1',2:'bg2',3:'bg3',4:'bg4'};
+  var catLabel=catLabels[cat];
+  var ac=ACTIES[cat];
+
+  var leidActies=ac.leid_acties.slice();
+  var melderTips=ac.melder_tips.slice();
+  if(melderGewond){
+    leidActies.unshift('! MEDISCHE ZORG: Zorg dat de medewerker onmiddellijk medische zorg krijgt. Laat letsels vaststellen door een arts — dit is noodzakelijk voor een eventuele aangifte arbeidsongeval.');
+    melderTips.unshift('Laat jouw letsels zo snel mogelijk vaststellen door een arts, ook als ze klein lijken. Dit is belangrijk voor een eventuele aangifte arbeidsongeval en juridische opvolging.');
+  }
+
+  var cols=['Nr','Datum reg.','Datum inc.','Tijdstip','Melder','Team','Pleger (naam/adres)','Hoedanigheid','Getuige','Recidive','Locatie','Categorie','Uitingsvorm','Taalbarr.','Invloed','Lich. schade','Mat. schade','Arb.ong.','Politie','PV-nr','Beschrijving'];
+  var regRow=[nr,regDatum,datum,tijd,naam,team,agressor,hoed,getuige,recidive,loc,catLabel,uitvorm,taalb,invl,lsch,msch,arbOng,pol,pvnr,beschr];
+  var regTabel=cols.join('\t')+'\n'+regRow.join('\t');
+
+  /* ============================================================
+     MAIL-BODY — één mail aan HR (to), leid (cc), melder (bcc)
+     ============================================================ */
+  var mailBody=
+'--- VOOR DE MELDER ---\n'
++'Meldingsnummer: '+nr+'\n'
++'Jouw melding is geregistreerd. Bewaar dit bericht als bevestiging.\n\n'
++'Tips en ondersteuning voor jou:\n'
++melderTips.map(function(t){return'- '+t;}).join('\n')+'\n\n'
++'Direct bereikbaar:\n'
++'- Mensura 24/7: 02 549 71 00\n'
++'- HR: hr@woonst.be | 03 318 18 79\n'
++'- Politie Sint-Niklaas: 03 760 65 00\n'
++'- Politie Temse: 03 711 02 02\n\n'
++'======================================================\n\n'
++'--- MELDINGSGEGEVENS ---\n'
++'Meldingsnummer:    '+nr+'\n'
++'Datum registratie: '+regDatum+'\n'
++'Datum incident:    '+datum+' om '+tijd+'\n'
++'Locatie:           '+loc+'\n\n'
++'Melder:            '+naam+'\n'
++'Team:              '+team+'\n\n'
++'Agressor/pleger:   '+agressor+'\n'
++'Hoedanigheid:      '+hoed+'\n'
++'Recidive:          '+recidive+'\n\n'
++'Categorie:         '+catLabel+'\n'
++'Uitingsvorm:       '+uitvorm+'\n'
++'Taalbarrière:      '+taalb+'\n'
++'Onder invloed:     '+invl+'\n\n'
++'Lichamelijke schade: '+lsch+'\n'
++'Materiële schade:    '+msch+'\n'
++'Aangifte arb.ong.:   '+arbOng+'\n'
++'Aangifte politie:    '+pol+(pol==='Ja'?' (PV: '+pvnr+')':'')+'\n\n'
++'Beschrijving feiten:\n'+beschr+'\n\n'
++'======================================================\n\n'
++'--- ACTIES VOOR LEIDINGGEVENDE ---\n'
++leidActies.join('\n')+'\n\n'
++'Tips voor leidinggevende:\n'
++ac.leid_tips.map(function(t){return'- '+t;}).join('\n')+'\n\n'
++'======================================================\n\n'
++'--- REGISTER (KOPIËREN NAAR EXCEL — ACTIE VOOR HR) ---\n'
++'Kopieer de twee regels hieronder (headers + data) en plak\n'
++'met Ctrl+V in het Excel-register op SharePoint.\n\n'
++regTabel+'\n\n'
++'---\nWoonST Agressiemeldingstool';
+
+  var mailHref='mailto:hr@woonst.be'
+    +'?cc='+encodeURIComponent(leidMail)
+    +'&bcc='+encodeURIComponent(melderMail)
+    +'&subject='+encodeURIComponent('[AGRESSIEMELDING] '+nr+' — '+catLabel)
+    +'&body='+encodeURIComponent(mailBody);
+
+  /* Open de mail */
+  window.location.href=mailHref;
+
+  /* Toon pop-up na korte vertraging (Outlook opent asynchroon) */
+  setTimeout(function(){
+    document.getElementById('popup-nr').textContent=nr;
+    document.getElementById('popup').classList.add('show');
+  },800);
+
+  /* Bouw resultaatscherm voor melder (alleen tips — register verborgen) */
+  var html='';
+  html+='<div class="nr-box"><div><div class="nr-lbl">Jouw meldingsnummer</div><div class="nr-val">'+nr+'</div></div></div>';
+  html+='<span class="badge '+badgeCls[cat]+'">'+catLabel+'</span>';
+  html+='<div class="card"><div class="card-title"><svg viewBox="0 0 24 24" style="color:var(--grn-text)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Voor jou &mdash; ondersteuning en tips</div>';
+  melderTips.forEach(function(t){html+='<div class="tip-block">'+t+'</div>';});
+  html+='<div class="support-bar"><strong>Direct bereikbaar</strong><div class="support-contacts">';
+  html+='<span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6.29 6.29l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Mensura 24/7 &mdash; 02&nbsp;549&nbsp;71&nbsp;00</span>';
+  html+='<span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>HR &mdash; hr@woonst.be &nbsp;|&nbsp; 03&nbsp;318&nbsp;18&nbsp;79</span>';
+  html+='<span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Politie Sint-Niklaas &mdash; 03&nbsp;760&nbsp;65&nbsp;00</span>';
+  html+='<span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Politie Temse &mdash; 03&nbsp;711&nbsp;02&nbsp;02</span>';
+  html+='</div></div></div>';
+  html+='<button class="reset-link" onclick="resetForm()" type="button"><svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.6"/></svg>Nieuwe melding indienen</button>';
+
+  document.getElementById('result-content').innerHTML=html;
+  showStep(4);
+}
+
+function closePopup(){
+  document.getElementById('popup').classList.remove('show');
+}
+
+function resetForm(){
+  cat=0;_nr='';
+  document.getElementById('field-pv').classList.remove('show');
+  document.querySelectorAll('input[type=text],input[type=email],input[type=date],input[type=time],textarea').forEach(function(i){i.value='';});
+  document.querySelectorAll('select').forEach(function(s){s.selectedIndex=0;});
+  document.querySelectorAll('input[type=checkbox]').forEach(function(c){c.checked=false;});
+  [1,2,3,4].forEach(function(i){document.getElementById('c'+i).className='cat-btn';});
+  clearErr();showStep(0);
+}
+showStep(0);
+</script>
+</body>
+</html>
